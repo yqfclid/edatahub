@@ -1,2 +1,2 @@
-## sugly slient for aliyun datahub
+## ugly slient for aliyun datahub
 
