@@ -27,7 +27,7 @@
 -export([append_field_by_reg/3]).
 -export([append_connector_field_by_reg/3]).
 
--export([defalult_auth/0]).
+-export([default_auth/0]).
 
 
 -include("edatahub.hrl").
@@ -41,7 +41,7 @@ start() ->
 
 -spec list_project() -> {ok, list()} | {error, term()}.
 list_project() ->
-    list_project(defalult_auth()).
+    list_project(default_auth()).
 
 
 -spec list_project(#dh_auth{}) -> {ok, list()} | {error, term()}.
@@ -61,7 +61,7 @@ list_project(DhAuth) ->
 
 -spec list_topic(binary()) -> {ok, list()} | {error, term()}.
 list_topic(Project) ->
-    list_topic(defalult_auth(), Project).
+    list_topic(default_auth(), Project).
 
 -spec list_topic(#dh_auth{}, binary()) -> {ok, list()} | {error, term()}.
 list_topic(DhAuth, Project) ->
@@ -81,7 +81,7 @@ list_topic(DhAuth, Project) ->
 
 -spec wait_shards_ready(binary(), binary()) -> ok.
 wait_shards_ready(Project, Topic) ->
-    wait_shards_ready(defalult_auth(), Project, Topic).
+    wait_shards_ready(default_auth(), Project, Topic).
 
 -spec wait_shards_ready(#dh_auth{}, binary(), binary()) -> ok.
 wait_shards_ready(DhAuth, Project, Topic) ->
@@ -94,7 +94,7 @@ wait_shards_ready(DhAuth, Project, Topic, Timeout) ->
 
 -spec list_shard(binary(), binary()) -> {ok, list()} | {error, term()}.
 list_shard(Project, Topic) ->
-    list_shard(defalult_auth(), Project, Topic).
+    list_shard(default_auth(), Project, Topic).
 
 -spec list_shard(#dh_auth{}, binary(), binary()) -> {ok, list()} | {error, term()}.
 list_shard(DhAuth, Project, Topic) ->
@@ -114,7 +114,7 @@ list_shard(DhAuth, Project, Topic) ->
 
 -spec topic_info(binary(), binary()) -> {ok, #dh_topic{}} | {error, term()}.
 topic_info(Project, Topic) ->
-    topic_info(defalult_auth(), Project, Topic).
+    topic_info(default_auth(), Project, Topic).
 
 -spec topic_info(#dh_auth{}, binary(), binary()) -> {ok, #dh_topic{}} | {error, term()}.
 topic_info(DhAuth, Project, Topic) ->
@@ -228,7 +228,7 @@ reg_topic(RegName, TopicInfo) when is_record(TopicInfo, dh_topic) ->
 
 -spec reg_topic(any(), binary(), binary()) -> ok.
 reg_topic(RegName, Project, Topic) ->
-    reg_topic(RegName, defalult_auth(), Project, Topic).
+    reg_topic(RegName, default_auth(), Project, Topic).
 
 -spec reg_topic(any(), #dh_auth{}, binary(), binary()) -> ok.
 reg_topic(RegName, DhAuth, Project, Topic) ->
@@ -306,8 +306,8 @@ append_connector_field_by_reg(RegName, ConnectorType, FieldName) ->
     end.
 
 
--spec defalult_auth() -> #dh_auth{}.
-defalult_auth() ->
+-spec default_auth() -> #dh_auth{}.
+default_auth() ->
     #dh_auth{endpoint = application:get_env(edatahub, endpoint, <<>>),
              access_id = application:get_env(edatahub, access_id, <<>>),
              access_key = application:get_env(edatahub, access_key, <<>>)}.
