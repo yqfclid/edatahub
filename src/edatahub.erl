@@ -27,6 +27,7 @@
 -export([append_field_by_reg/3]).
 -export([append_connector_field_by_reg/3]).
 
+-export([defalult_auth/0]).
 
 
 -include("edatahub.hrl").
