@@ -36,14 +36,13 @@ init([]) ->
                      {write_concurrency,true}, {read_concurrency, true}]),
     DefaultPoolOpt = [{max_connections, 100}, {timeout, 60000}],
     PoolOpt = application:get_env(edatahub, http_pool, DefaultPoolOpt),
-    UpdateInterval = application:get_env(edatahub, update_interval, 30000),
     SupFlags = 
         #{strategy => one_for_one,
           intensity => 10,
           period => 10},
     Proc1 = 
       #{id => edatahub_updater,              
-        start => {edatahub_updater, start_link, [UpdateInterval]},
+        start => {edatahub_updater, start_link, []},
         restart => transient,
         shutdown => infinity,
         type => worker,

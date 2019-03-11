@@ -13,7 +13,7 @@
 %% API
 -export([add_reg_topic/1, del_reg_topic/1]).
 -export([update/0]).
--export([start_link/1]).
+-export([start_link/0]).
 
 %% gen_server callbacks
 -export([init/1,
@@ -27,7 +27,7 @@
 
 -include("edatahub.hrl").
 
--record(state, {interval, time_ref, reg_topics = sets:new()}).
+-record(state, {reg_topics = sets:new()}).
 
 %%%===================================================================
 %%% API
@@ -47,8 +47,8 @@ update() ->
 %% @spec start_link() -> {ok, Pid} | ignore | {error, Error}
 %% @end
 %%--------------------------------------------------------------------
-start_link(Interval) ->
-    gen_server:start_link({local, ?SERVER}, ?MODULE, [Interval], []).
+start_link() ->
+    gen_server:start_link({local, ?SERVER}, ?MODULE, [], []).
 
 
 %%%===================================================================
@@ -66,9 +66,8 @@ start_link(Interval) ->
 %%                     {stop, Reason}
 %% @end
 %%--------------------------------------------------------------------
-init([Interval]) ->
-    Timer = erlang:start_timer(Interval, self(), update),
-    {ok, #state{interval = Interval, time_ref = Timer}}.
+init([]) ->
+    {ok, #state{}}.
 
 %%--------------------------------------------------------------------
 %% @private
@@ -125,12 +124,6 @@ handle_cast(_Msg, State) ->
 %%                                   {stop, Reason, State}
 %% @end
 %%--------------------------------------------------------------------
-handle_info({timeout, Timer, update}, #state{time_ref = Timer} = State) ->
-    #state{interval = Interval, reg_topics = RegTopics} = State, 
-    do_update(RegTopics),   
-    NTimer = erlang:start_timer(Interval, self(), update),
-    {noreply, State#state{time_ref = NTimer}};
-
 handle_info(_Info, State) ->
     lager:warning("Can't handle info: ~p", [_Info]),
     {noreply, State}.
