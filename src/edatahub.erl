@@ -152,7 +152,7 @@ topic_info(DhAuth, Project, Topic) ->
     end.
 
 
--spec put_records(#dh_auth{}, list()) -> {ok, #dh_topic{}} | {error, term()}.
+-spec put_records(#dh_auth{}, list()) -> {ok, FailedCount :: integer(), FailedRecords :: list()} | {error, term()}.
 put_records(DhTopic, Records) when is_record(DhTopic, dh_topic) ->
     #dh_topic{auth = DhAuth,
               project = Project,
@@ -167,7 +167,18 @@ put_records(DhTopic, Records) when is_record(DhTopic, dh_topic) ->
     Body = jsx:encode(#{<<"Action">> => <<"pub">>,
                         <<"Records">> => NRecords}),
     Headers = edatahub_rest:common_headers(<<"POST">>, Path, AccessId, AccessKey, Body),
-    edatahub_rest:http_request(post, Url, Headers, Body);
+    case edatahub_rest:http_request(post, Url, Headers, Body) of
+        {ok, RtnBody} ->
+            case catch jsx:decode(RtnBody, [return_maps]) of
+                #{<<"FailedRecordCount">> := FailedCount,
+                  <<"FailedRecords">> := FailedRecords} ->
+                    {ok, FailedCount, FailedRecords};
+                {'EXIT', Reason} ->
+                    {error, Reason}
+            end;
+        {error, Reason} ->
+            {error, Reason}
+    end;
 put_records(_, _) ->
     {error, badarg}.
 
@@ -232,7 +243,7 @@ unreg_topic(RegName) ->
     ets:delete(?DH_REG, RegName),
     edatahub_updater:del_reg_topic(RegName).
     
--spec topic_info_by_reg(any()) -> {ok, #dh_topic{}} | {error, term()}.
+-spec topic_info_by_reg(any()) -> {ok, term()} | {error, term()}.
 topic_info_by_reg(RegName) ->
     case ets:lookup(?DH_REG, RegName) of
         [{RegName, TopicInfo}] ->
