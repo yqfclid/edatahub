@@ -18,6 +18,7 @@ start(_StartType, _StartArgs) ->
     exometer:start(),
     application:set_env(hackney, mod_metrics, exometer),
     application:ensure_all_started(hackney),
+    lager:start(),
     edatahub_sup:start_link().
 
 %%--------------------------------------------------------------------
