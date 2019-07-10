@@ -17,12 +17,7 @@
 %%% API
 %%%===================================================================
 http_request(Method, Url, Headers, Body) ->
-    Optioins = 
-        [{ssl_options, [{depth, 2}]},
-         {pool, edatahub},
-         {connect_timeout, 5000},
-         {recv_timeout, 120000}
-        ],
+    Optioins = get_options(Url),
     case hackney:request(Method, Url, Headers, Body, Optioins) of
         {ok, StatusCode, _RepHeaders, Ref} ->
             case hackney:body(Ref) of
@@ -85,6 +80,21 @@ common_headers(Method, Path, AccessId, AccessKey, Body) ->
 %%%===================================================================
 %%% Internal functions
 %%%===================================================================
+get_options(<<"https", _/binary>>) ->
+    [
+        {ssl_options, [{depth, 2}]},
+        {pool, edatahub},
+        {connect_timeout, 5000},
+        {recv_timeout, 120000}
+    ];
+get_options(_) ->
+    [
+        {pool, edatahub},
+        {connect_timeout, 5000},
+        {recv_timeout, 120000}
+    ]. 
+
+
 to_binary(null) ->
     null;
 to_binary(S) when is_atom(S) ->
