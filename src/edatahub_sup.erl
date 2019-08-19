@@ -34,7 +34,7 @@ start_link() ->
 init([]) ->
     ets:new(?DH_REG, [set, named_table, public, 
                      {write_concurrency,true}, {read_concurrency, true}]),
-    DefaultPoolOpt = [{max_connections, 100}, {timeout, 60000}],
+    DefaultPoolOpt = [{max_connections, 200}, {timeout, 60000}],
     PoolOpt = application:get_env(edatahub, http_pool, DefaultPoolOpt),
     SupFlags = 
         #{strategy => one_for_one,
