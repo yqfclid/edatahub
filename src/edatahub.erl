@@ -341,6 +341,6 @@ do_wait_shards_ready(DhAuth, Project, Topic, Timeout, LastTime, EndTime) ->
 is_shards_all_ready(Shards) ->
     lists:all(
         fun(Shard) -> 
-            State = map:get(<<"State">>, Shard, <<"CLOSE">>),
+            State = maps:get(<<"State">>, Shard, <<"CLOSE">>),
             lists:member(State, [<<"CLOSE">>, <<"ACTIVE">>])
     end, Shards).
