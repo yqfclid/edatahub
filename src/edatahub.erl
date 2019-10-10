@@ -316,7 +316,10 @@ default_auth() ->
 %%% Internal functions
 %%%===================================================================
 do_wait_shards_ready(DhAuth, Project, Topic, Timeout, LastTime) ->
-    case Timeout + LastTime > os:system_time(seconds) of
+    do_wait_shards_ready(DhAuth, Project, Topic, Timeout, LastTime, Timeout + LastTime).
+
+do_wait_shards_ready(DhAuth, Project, Topic, Timeout, LastTime, EndTime) ->
+    case Timeout + LastTime > EndTime of
         true ->
             ok;
         false ->
@@ -328,7 +331,7 @@ do_wait_shards_ready(DhAuth, Project, Topic, Timeout, LastTime) ->
                         false ->
                             timer:sleep(1),
                             Now = os:system_time(seconds),
-                            do_wait_shards_ready(DhAuth, Project, Topic, Timeout, Now)
+                            do_wait_shards_ready(DhAuth, Project, Topic, Timeout, Now, EndTime)
                     end;
                 {error, Reason} ->
                     {error, Reason}
