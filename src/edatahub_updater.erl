@@ -164,6 +164,6 @@ do_update(RegTopics) ->
                 {ok, TopicInfo} ->
                     ets:insert(?DH_REG, {RegTopic, TopicInfo});
                 {error, Reason} ->
-                    lager:error("update reg topic ~p failed: ~p", [RegTopic, Reason])
+                    lager:debug("update reg topic ~p failed: ~p", [RegTopic, Reason])
             end
         end, ok, RegTopics).
