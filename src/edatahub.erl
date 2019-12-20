@@ -18,6 +18,7 @@
 -export([put_records/2]).
 -export([append_field/3]).
 -export([append_connector_field/3]).
+-export([reload_connector/2, reload_connector/3]).
 
 -export([reg_topic/2, reg_topic/3, reg_topic/4]).
 -export([unreg_topic/1]).
@@ -26,6 +27,7 @@
 -export([put_records_by_reg/2]).
 -export([append_field_by_reg/3]).
 -export([append_connector_field_by_reg/3]).
+-export([reload_connector_by_reg/2, reload_connector_by_reg/3]).
 
 -export([default_auth/0]).
 
@@ -220,6 +222,26 @@ append_connector_field(DhTopic, ConnectorType, FieldName) when is_record(DhTopic
 append_connector_field(_, _, _) ->
     {error, badarg}.
 
+-spec reload_connector(#dh_topic{}, binary()) -> {ok, term()} | {error, term()}.
+reload_connector(DhTopic, ConnectorType) when is_record(DhTopic, dh_topic) ->
+  reload_connector(DhTopic, ConnectorType, <<>>).
+
+-spec reload_connector(#dh_topic{}, binary(), binary()) -> {ok, term()} | {error, term()}.
+reload_connector(DhTopic, ConnectorType, ShardId) when is_record(DhTopic, dh_topic) ->
+    #dh_topic{auth = DhAuth,
+              project = Project,
+              topic = Topic} = DhTopic,
+    #dh_auth{endpoint = Endpoint,
+             access_id = AccessId,
+             access_key = AccessKey} = DhAuth,
+    Path = <<"/projects/", Project/binary, "/topics/", Topic/binary, "/connectors/", ConnectorType/binary>>,
+    Url = <<Endpoint/binary, Path/binary>>,
+    Body = jsx:encode(#{<<"Action">> => <<"Reload">>,
+                        <<"ShardId">> => ShardId}),
+    Headers = edatahub_rest:common_headers(<<"POST">>, Path, AccessId, AccessKey, Body),
+    edatahub_rest:http_request(post, Url, Headers, Body);
+reload_connector(_, _, _) ->
+    {error, badarg}. 
 
 -spec reg_topic(any(), #dh_topic{}) -> ok.
 reg_topic(RegName, TopicInfo) when is_record(TopicInfo, dh_topic) ->
@@ -299,6 +321,21 @@ append_connector_field_by_reg(RegName, ConnectorType, FieldName) ->
     case ets:lookup(?DH_REG, RegName) of
         [{RegName, TopicInfo}] ->
             append_connector_field(TopicInfo, ConnectorType, FieldName);
+        [] ->
+            {error, no_such_reg};
+        {error, Reason} ->
+            {error, Reason}
+    end.
+
+-spec reload_connector_by_reg(#dh_topic{}, binary()) -> {ok, term()} | {error, term()}.
+reload_connector_by_reg(RegName, ConnectorType) ->
+  reload_connector_by_reg(RegName, ConnectorType, <<>>).
+
+-spec reload_connector_by_reg(#dh_topic{}, binary(), binary()) -> {ok, term()} | {error, term()}.
+reload_connector_by_reg(RegName, ConnectorType, ShardId) ->
+    case ets:lookup(?DH_REG, RegName) of
+        [{RegName, TopicInfo}] ->
+            reload_connector(TopicInfo, ConnectorType, ShardId);
         [] ->
             {error, no_such_reg};
         {error, Reason} ->
