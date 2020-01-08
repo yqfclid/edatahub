@@ -22,6 +22,7 @@
 
 -export([reg_topic/2, reg_topic/3, reg_topic/4]).
 -export([unreg_topic/1]).
+-export([is_regged/1]).
 -export([topic_info_by_reg/1]).
 -export([wait_shards_ready_by_reg/1]).
 -export([put_records_by_reg/2]).
@@ -30,6 +31,7 @@
 -export([reload_connector_by_reg/2, reload_connector_by_reg/3]).
 
 -export([default_auth/0]).
+
 
 
 -include("edatahub.hrl").
@@ -265,6 +267,15 @@ reg_topic(RegName, DhAuth, Project, Topic) ->
 unreg_topic(RegName) ->
     ets:delete(?DH_REG, RegName),
     edatahub_updater:del_reg_topic(RegName).
+
+-spec is_regged(any()) -> boolean.
+is_regged(RegName) ->
+    case ets:lookup(?DH_REG, RegName) of
+        [{RegName, _}] ->
+            true;
+        _ ->
+            false
+    end.
     
 -spec topic_info_by_reg(any()) -> {ok, term()} | {error, term()}.
 topic_info_by_reg(RegName) ->
